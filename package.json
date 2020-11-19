@@ -1,10 +1,9 @@
 {
-  "name": "@williamluke4/fast",
-  "version": "0.0.1",
+  "name": "@harambee/fast",
+  "version": "0.0.2",
   "description": "Project Generator ",
-  "repository": "https://github.com/prisma/codemods.git",
+  "repository": "https://github.com/Harambee-Dev/fast.git",
   "author": "William Luke <william@atto-byte.com>",
-  "license": "Apache-2.0",
   "bin": {
     "fast": "./dist/bin/fast.js"
   },
@@ -37,6 +36,7 @@
     "fs-extra": "^9.0.1",
     "inquirer": "7.3.3",
     "meow": "8.0.0",
+    "request": "^2.88.2",
     "vcsurl": "^0.1.1"
   },
   "engines": {
