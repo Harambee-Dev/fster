@@ -1,6 +1,6 @@
 {
   "name": "@harambee/fast",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Make things fast, Break things fast, Learn things fast",
   "repository": "https://github.com/Harambee-Dev/fast.git",
   "author": "William Luke <william@atto-byte.com>",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@octokit/rest": "^18.0.9",
     "adm-zip": "^0.4.16",
-    "chalk": "4.1.0",
+    "chalk": "^4.1.0",
     "execa": "^4.1.0",
     "fs-extra": "^9.0.1",
     "inquirer": "7.3.3",
