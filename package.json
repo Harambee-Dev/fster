@@ -1,7 +1,7 @@
 {
   "name": "@harambee/fast",
-  "version": "0.0.2",
-  "description": "Project Generator ",
+  "version": "0.0.3",
+  "description": "Make things fast, Break things fast, Learn things fast",
   "repository": "https://github.com/Harambee-Dev/fast.git",
   "author": "William Luke <william@atto-byte.com>",
   "bin": {
