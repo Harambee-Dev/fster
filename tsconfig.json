@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "sourceMap": true,
+    "outDir": "dist",
+    "declaration": false,
+    "strict": true,
+    "esModuleInterop": true,
+    "target": "es2015",
+    "downlevelIteration": true,
+    "preserveWatchOutput": true,
+  },
+  "include": ["src"],
+  "exclude": ["node_modules","tests", "dist"]
+}
