@@ -64,7 +64,7 @@ export class GithubDownloader extends EventEmitter {
     const url = `${this.initialUrl}${customPath ?? this.path}${
       this.initialUrlRef
     }`;
-    console.log(url);
+    // console.log(url);
     return url;
   }
   checkDone() {
@@ -101,13 +101,13 @@ export class GithubDownloader extends EventEmitter {
     });
   }
   handleItem(item: ReposGetContentResponseData) {
-    console.log({outputDir: this.outputDir});
+    // console.log({outputDir: this.outputDir});
+    const cleaned = item.path.replace(this.path.substring(1), ``)
+    const destinationPath = path.join(this.outputDir, cleaned)
     if (item.type === "dir") {
-      const rel = path.relative(this.path, item.path)
-      const dir = path.join(this.outputDir, );
-      fs.mkdirs(dir, (err) => {
+      fs.mkdirs(destinationPath, (err) => {
         if (err) this.emit("error", err);
-        this._log.push(dir);
+        this._log.push(destinationPath);
         this.gonnaProcess += 1;
         this.requestJSON(item.path);
         this.emit("dir", item.path);
@@ -115,15 +115,13 @@ export class GithubDownloader extends EventEmitter {
         this.checkDone();
       });
     } else if (item.type === "file") {
-      const rel = path.relative(this.path, item.path)
-      const file = path.join(this.outputDir, rel);
-      fs.createFile(file, (err) => {
+      fs.createFile(destinationPath, (err) => {
         if (err) this.emit("error", err);
         request
           .get(this.rawUrl + item.path)
-          .pipe(fs.createWriteStream(file))
+          .pipe(fs.createWriteStream(destinationPath))
           .on("close", () => {
-            this._log.push(file);
+            this._log.push(destinationPath);
             this.emit("file", item.path);
             this.pending -= 1;
             this.checkDone();
@@ -181,7 +179,7 @@ export class GithubDownloader extends EventEmitter {
 
   requestJSON(customPath?: string) {
     const url = this.urlBuilder(customPath);
-    console.log(url);
+    // console.log(url);
     request({ url: url, headers: { 'User-Agent': 'fast/0.0.1' } }, (err, resp, body) => {
       if (err) return this.emit("error", err);
       if (resp.statusCode === 403) return this.downloadZip();

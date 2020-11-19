@@ -4,7 +4,6 @@ import meow from "meow";
 import path from "path";
 import { GithubDownloader } from "../lib/github-download";
 import { ReposGetContentResponseData } from "../types";
-import keytar from 'keytar';
 
 const octokit = new Octokit({
   userAgent: "prisma-fast v1.2.3",
@@ -41,7 +40,6 @@ async function run() {
     }
   );
 
-
   const outputDir = cli.input[0];
   const found = await loop();
   if (found && found.isExample && found.path) {
@@ -54,8 +52,6 @@ async function run() {
     });
     return gh.download();
   }
-
-  
 }
 async function loop() {
   let looking = true;
@@ -63,7 +59,7 @@ async function loop() {
   while (looking) {
     const result = await recursiveFind(currentPath);
     if (result.isExample) {
-      console.log(result);
+      result;
       return result;
     }
     currentPath = currentPath + "/" + result.path;
@@ -103,7 +99,7 @@ async function recursiveFind(path: string) {
       choices: category_choices,
     },
   ]);
-  console.log(category);
+  // console.log(category);
   return { path: category, isExample: false };
 }
 interface Item {
