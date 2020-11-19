@@ -28,7 +28,12 @@ async function run() {
   const cli = meow(
     `
   Usage
-    $ npx @williamluke4/fast 
+    $ npx @harambee/fast <dest> <...options>
+      
+      dest     (optional) Directory to output to
+
+      options
+        -(-s)etup         Runs npm install 
 `,
     {
       autoHelp: true,

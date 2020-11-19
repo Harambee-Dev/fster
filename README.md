@@ -1,34 +1,32 @@
-# Prisma Codemods
+# Fast
 
-![npm](https://img.shields.io/npm/v/@prisma/codemods?style=flat-square)
+![npm](https://img.shields.io/npm/v/@harambee/fast?style=flat-square)
 
-A Collection of Codemods for Prisma
+Make things _fast_, Break things _fast_, Learn things _fast_
 
 ## Usage
 
-```shell
-$ npx @prisma/codemods <transform> <path> <...options>
-```
 
 ```shell
-  transform    One of the choices from https://github.com/prisma/codemods/#transforms
-  path         Files or directory to your app. e.g ./my-awesome-project
+$ npx @harambee/fast <dest> <...options>
+
+$ yarn global add @harambee/fast
+
+$ npm i -g @harambee/fast
+```
+### Global Usage
+```shell
+$ fast <dest> <...options>
+```
+### Options
+```shell
+  dest     (optional) Directory to output to
 ```
 
 ```shell
 Options
-  -(-f)orce         Bypass Git safety checks and forcibly run codemods
-  -(-d)ry           Dry run (no changes are made to files)
-  -(-p)rint         Print transformed files to your terminal
+  -(-s)etup         Runs npm install
 ```
-
-### Transforms
-
-| \<transform>  | Description                                          | Example                                         |
-| ------------- | ---------------------------------------------------- | ----------------------------------------------- |
-| `namespace`   | Codemod for `@prisma/client` namespace change        | `npx @prisma/codemods namespace ./my-project`   |
-| `findUnique`  | Converts `prisma.x.findOne` to `prisma.x.findUnique` | `npx @prisma/codemods findUnique ./my-project`  |
-| `update-2.12` | Includes `namespace` & `findUnique`                  | `npx @prisma/codemods update-2.12 ./my-project` |
 
 ## Development
 

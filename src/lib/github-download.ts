@@ -17,7 +17,7 @@ export class GithubDownloader extends EventEmitter {
   user: string;
   repo: string;
   ref: string;
-  _log: any[];
+  _fileTracker: any[];
   _getZip: boolean;
   pending: number;
   gonnaProcess: number;
@@ -33,17 +33,12 @@ export class GithubDownloader extends EventEmitter {
     this.repo = params.repo;
     this.ref = params.ref ?? 'latest';
     this.outputDir = params.outputDir;
-    this._log = [];
+    this._fileTracker = [];
     this.path = params.path || "";
     this._getZip = false;
     this.pending = 0;
     this.gonnaProcess = 0;
-    this.initialUrl =
-      "https://api.github.com/repos/" +
-      this.user +
-      "/" +
-      this.repo +
-      "/contents/";
+    this.initialUrl = `https://api.github.com/repos/${this.user}/${this.repo}/contents/`;
     this.initialUrlRef = this.ref ? `?ref=${this.ref}` : "";
     this.rawUrl = this.rawBuilder(this.user, this.repo, this.ref)
   }
@@ -103,7 +98,7 @@ export class GithubDownloader extends EventEmitter {
     if (item.type === "dir") {
       fs.mkdirs(destinationPath, (err) => {
         if (err) this.emit("error", err);
-        this._log.push(destinationPath);
+        this._fileTracker.push(destinationPath);
         this.gonnaProcess += 1;
         this.requestJSON(item.path);
         this.emit("dir", item.path);
@@ -117,7 +112,7 @@ export class GithubDownloader extends EventEmitter {
           .get(this.rawUrl + item.path)
           .pipe(fs.createWriteStream(destinationPath))
           .on("close", () => {
-            this._log.push(destinationPath);
+            this._fileTracker.push(destinationPath);
             this.emit("file", item.path);
             this.pending -= 1;
             this.checkDone();
@@ -135,7 +130,7 @@ export class GithubDownloader extends EventEmitter {
     if (this._getZip) return;
     this._getZip = true;
 
-    this._log.forEach( (file) => {
+    this._fileTracker.forEach( (file) => {
       fs.remove(file);
     });
 
