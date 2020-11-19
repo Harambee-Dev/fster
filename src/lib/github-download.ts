@@ -31,7 +31,7 @@ export class GithubDownloader extends EventEmitter {
     super();
     this.user = params.user;
     this.repo = params.repo;
-    this.ref = params.ref ?? '';
+    this.ref = params.ref ?? 'latest';
     this.outputDir = params.outputDir;
     this._log = [];
     this.path = params.path || "";
@@ -45,14 +45,10 @@ export class GithubDownloader extends EventEmitter {
       this.repo +
       "/contents/";
     this.initialUrlRef = this.ref ? `?ref=${this.ref}` : "";
-    this.rawUrl =
-      "https://raw.github.com/" +
-      this.user +
-      "/" +
-      this.repo +
-      "/" +
-      this.ref +
-      "/";
+    this.rawUrl = this.rawBuilder(this.user, this.repo, this.ref)
+  }
+  rawBuilder(user: string, repo: string, ref: string): string { 
+    return `https://raw.githubusercontent.com/${this.user}/${this.repo}/${ref}/`
   }
   processItems(items: ReposGetContentResponseData[]) {
     this.pending += items.length;

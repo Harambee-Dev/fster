@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import execa from "execa";
 import inquirer from "inquirer";
 import meow from "meow";
 import path from "path";
@@ -36,20 +37,31 @@ async function run() {
           alias: "h",
           type: "boolean",
         },
+        setup: {
+          alias: "s",
+          type: "boolean",
+        },
       },
     }
   );
-
-  const outputDir = cli.input[0];
+  const argOutputDir = cli.input[0];
   const found = await loop();
   if (found && found.isExample && found.path) {
     const dir = path.basename(found.path);
+    const outputDir = path.join(process.cwd(), argOutputDir ? argOutputDir : dir)
     const gh = new GithubDownloader({
       user: "prisma",
       repo: "prisma-examples",
       path: found.path,
-      outputDir: path.join(process.cwd(), outputDir ? outputDir : dir),
+      outputDir,
     });
+    gh.on("end", async () => {
+      console.log('finished');
+      if(cli.flags.setup){
+        const installProcess = await execa(`npm`, [ 'install'], { cwd: outputDir, stdio: 'inherit'})
+        console.log(`Now run:\n\tcd ${outputDir}`);
+      }
+    })
     return gh.download();
   }
 }
@@ -102,51 +114,8 @@ async function recursiveFind(path: string) {
   // console.log(category);
   return { path: category, isExample: false };
 }
-interface Item {
-  name: string;
-  path: string;
-  link?: string;
-  isDir: boolean;
-}
-async function getAllUrls(path: string) {
-  const response = await octokit.repos.getContent({
-    owner: "prisma",
-    repo: "prisma-examples",
-    path: path,
-  });
-  let files: Item[] = [];
-  // @ts-ignore
-  const data = split(path, response.data);
-  files.push(...data.files);
-  if (data.folders.length > 0) {
-    for (const folder of data.folders) {
-      const sub = await getAllUrls(folder.path);
-      files.push(...sub);
-    }
-  }
-  return files;
-}
-function split(path: string, items: ReposGetContentResponseData[]) {
-  return items.reduce(
-    (acc, item) => {
-      if (item.type === "dir") {
-        acc.folders.push({
-          isDir: true,
-          name: item.name,
-          path: path + "/" + item.name,
-        });
-      } else {
-        acc.files.push({
-          isDir: false,
-          name: item.name,
-          path: path + "/" + item.name,
-        });
-      }
-      return acc;
-    },
-    { files: [], folders: [] } as { files: Item[]; folders: Item[] }
-  );
-}
+
+
 module.exports = {
   run: run,
 };
