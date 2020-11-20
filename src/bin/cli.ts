@@ -1,28 +1,10 @@
-import { Octokit } from "@octokit/rest";
+import chalk from "chalk";
 import execa from "execa";
 import inquirer from "inquirer";
 import meow from "meow";
 import path from "path";
-import { GithubDownloader } from "../lib/github-download";
-import { ReposGetContentResponseData } from "../types";
-
-const octokit = new Octokit({
-  userAgent: "prisma-fast v1.2.3",
-  baseUrl: "https://api.github.com",
-
-  log: {
-    debug: () => {},
-    info: () => {},
-    warn: console.warn,
-    error: console.error,
-  },
-
-  request: {
-    agent: undefined,
-    fetch: undefined,
-    timeout: 0,
-  },
-});
+import { ExampleRepo, EXAMPLE_REPOS } from "../examples";
+import { fetchContent, GithubDownloader } from "../lib/github-download";
 
 async function run() {
   const cli = meow(
@@ -50,31 +32,59 @@ async function run() {
     }
   );
   const argOutputDir = cli.input[0];
-  const found = await loop();
+  const { who } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "who",
+      required: true,
+      default: 'prisma',
+      message: "Who's examples are you looking for",
+      pageSize: Object.keys(EXAMPLE_REPOS).length,
+      choices: Object.keys(EXAMPLE_REPOS),
+    },
+  ]);
+  const examples = EXAMPLE_REPOS[who as keyof typeof EXAMPLE_REPOS]
+  const found = await loop(examples);
+
   if (found && found.isExample && found.path) {
     const dir = path.basename(found.path);
-    const outputDir = path.join(process.cwd(), argOutputDir ? argOutputDir : dir)
+    const outputDir = path.join(
+      process.cwd(),
+      argOutputDir ? argOutputDir : dir
+    );
     const gh = new GithubDownloader({
-      user: "prisma",
-      repo: "prisma-examples",
+      user: examples.user,
+      repo: examples.repo,
       path: found.path,
+      ref: examples.defaultRef,
       outputDir,
     });
     gh.on("end", async () => {
-      console.log('finished');
-      if(cli.flags.setup){
-        const installProcess = await execa(`npm`, [ 'install'], { cwd: outputDir, stdio: 'inherit'})
-        console.log(`Now run:\n\tcd ${outputDir}`);
+      console.log(`${chalk.green("✓")} Downloaded`);
+      if (cli.flags.setup) {
+        const installProcess = await execa(`npm`, ["install"], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
+        console.log(`${chalk.green("✓")} Packages Installed`);
       }
-    })
+      console.log(`${chalk.green("✓")} Complete`);
+      let getStarted = `\n${chalk.bold("To get started run")}:\n`
+      getStarted += `  cd ${path.relative(process.cwd(), outputDir)}\n`
+      if(!cli.flags.setup){
+        getStarted += "  npm i" 
+      }
+      console.log(getStarted);
+    });
     return gh.download();
   }
 }
-async function loop() {
+
+async function loop(config: ExampleRepo) {
   let looking = true;
-  let currentPath = "";
+  let currentPath = config.initialPath;
   while (looking) {
-    const result = await recursiveFind(currentPath);
+    const result = await recursiveFind(config, currentPath);
     if (result.isExample) {
       result;
       return result;
@@ -82,20 +92,18 @@ async function loop() {
     currentPath = currentPath + "/" + result.path;
   }
 }
-async function recursiveFind(path: string) {
-  const response = await octokit.repos.getContent({
-    owner: "prisma",
-    repo: "prisma-examples",
+async function recursiveFind(config: ExampleRepo, path: string) {
+  const response = await fetchContent({
+    user: config.user,
+    repo: config.repo,
+    ref: config.defaultRef,
     path: path,
   });
-  // @ts-ignore
-  if (response.data.some((item) => item.name === "package.json")) {
+  if (response.some((item) => item.name === "package.json")) {
     return { path: path, isExample: true };
   }
-  // @ts-ignore
-  const folders: ReposGetContentResponseData[] = response.data.filter(
-    (item: ReposGetContentResponseData) =>
-      item.type === "dir" && !item.name.startsWith(".")
+  const folders = response.filter(
+    (item) => item.type === "dir" && !item.name.startsWith(".")
   );
 
   const category_choices = folders.reduce((acc, value) => {
@@ -119,7 +127,6 @@ async function recursiveFind(path: string) {
   // console.log(category);
   return { path: category, isExample: false };
 }
-
 
 module.exports = {
   run: run,

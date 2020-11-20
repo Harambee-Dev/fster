@@ -5,13 +5,43 @@ import path from "path";
 import request from "request";
 import { ReposGetContentResponseData } from "../types";
 
-
 interface GithubDownloadParams {
   user: string;
   repo: string;
   path?: string;
-  ref?: string;
+  ref: string;
   outputDir: string;
+}
+
+export function fetchContent(
+  params: Pick<GithubDownloadParams, "user" | "repo" | "path" | "ref">
+): Promise<ReposGetContentResponseData[]> {
+  const url = `https://api.github.com/repos/${params.user}/${params.repo}/contents/${params.path}?ref=${params.ref}`;
+  return new Promise((resolve, reject) => {
+    request(
+      { url: url, headers: { "User-Agent": "fast/0.0.1" } },
+      (err, resp, body) => {
+        if (err) return reject(err);
+        if (resp.statusCode !== 200) {
+          reject(
+            new Error(
+              url +
+                ": returned " +
+                resp.statusCode +
+                "\nMessage: " +
+                JSON.parse(body)["message"] +
+                "\n"
+            )
+          );
+        }
+        const response = JSON.parse(body);
+        if (response) {
+          resolve(response as ReposGetContentResponseData[]);
+        }
+        reject(new Error("Could not find data on response"));
+      }
+    );
+  });
 }
 export class GithubDownloader extends EventEmitter {
   user: string;
@@ -31,7 +61,7 @@ export class GithubDownloader extends EventEmitter {
     super();
     this.user = params.user;
     this.repo = params.repo;
-    this.ref = params.ref ?? 'latest';
+    this.ref = params.ref;
     this.outputDir = params.outputDir;
     this._fileTracker = [];
     this.path = params.path || "";
@@ -40,10 +70,10 @@ export class GithubDownloader extends EventEmitter {
     this.gonnaProcess = 0;
     this.initialUrl = `https://api.github.com/repos/${this.user}/${this.repo}/contents/`;
     this.initialUrlRef = this.ref ? `?ref=${this.ref}` : "";
-    this.rawUrl = this.rawBuilder(this.user, this.repo, this.ref)
+    this.rawUrl = this.rawBuilder(this.user, this.repo, this.ref);
   }
-  rawBuilder(user: string, repo: string, ref: string): string { 
-    return `https://raw.githubusercontent.com/${this.user}/${this.repo}/${ref}/`
+  rawBuilder(user: string, repo: string, ref: string): string {
+    return `https://raw.githubusercontent.com/${this.user}/${this.repo}/${ref}/`;
   }
   processItems(items: ReposGetContentResponseData[]) {
     this.pending += items.length;
@@ -93,8 +123,8 @@ export class GithubDownloader extends EventEmitter {
   }
   handleItem(item: ReposGetContentResponseData) {
     // console.log({outputDir: this.outputDir});
-    const cleaned = item.path.replace(this.path.substring(1), ``)
-    const destinationPath = path.join(this.outputDir, cleaned)
+    const cleaned = item.path.replace(this.path.substring(1), ``);
+    const destinationPath = path.join(this.outputDir, cleaned);
     if (item.type === "dir") {
       fs.mkdirs(destinationPath, (err) => {
         if (err) this.emit("error", err);
@@ -130,11 +160,11 @@ export class GithubDownloader extends EventEmitter {
     if (this._getZip) return;
     this._getZip = true;
 
-    this._fileTracker.forEach( (file) => {
+    this._fileTracker.forEach((file) => {
       fs.remove(file);
     });
 
-    const tmpdir = process.cwd()
+    const tmpdir = process.cwd();
     const zipBaseDir = this.repo + "-" + this.ref;
     const zipFile = path.join(tmpdir, zipBaseDir + ".zip");
 
@@ -171,25 +201,26 @@ export class GithubDownloader extends EventEmitter {
   requestJSON(customPath?: string) {
     const url = this.urlBuilder(customPath);
     // console.log(url);
-    request({ url: url, headers: { 'User-Agent': 'fast/0.0.1' } }, (err, resp, body) => {
-      if (err) return this.emit("error", err);
-      if (resp.statusCode === 403) return this.downloadZip();
-      if (resp.statusCode !== 200)
-        this.emit(
-          "error",
-          new Error(
-            url + ": returned " + resp.statusCode + "\n\nbody:\n" + body
-          )
-        );
+    request(
+      { url: url, headers: { "User-Agent": "fast/0.0.1" } },
+      (err, resp, body) => {
+        if (err) return this.emit("error", err);
+        if (resp.statusCode === 403) return this.downloadZip();
+        if (resp.statusCode !== 200)
+          this.emit(
+            "error",
+            new Error(
+              url + ": returned " + resp.statusCode + "\n\nbody:\n" + body
+            )
+          );
 
-      this.processItems(JSON.parse(body));
-    });
+        this.processItems(JSON.parse(body));
+      }
+    );
   }
 }
 
-export function download(
-  params: GithubDownloadParams,
-) {
+export function download(params: GithubDownloadParams) {
   const gh = new GithubDownloader(params);
   return gh.download();
 }
@@ -197,5 +228,5 @@ export function download(
 // PRIVATE METHODS
 
 function generateTempDir() {
-  return process.cwd()
+  return process.cwd();
 }
