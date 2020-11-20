@@ -27,7 +27,11 @@ $ fast <dest> <...options>
 Options
   -(-s)etup         Runs npm install
 ```
+## Supported Examples
+- Prisma
+- Vercel
 
+To add more just edit [examples.ts](./src/examples.ts)
 ## Development
 
 ```shell
