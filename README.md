@@ -43,7 +43,7 @@ To add more just edit [examples.ts](./src/examples.ts)
 ## Development
 
 ```shell
-git clone https://github.com/prisma/codemods.git
+git clone https://github.com/Harambee-Dev/fasT.git
 cd codemods
 yarn && yarn watch
 ```
