@@ -17,4 +17,10 @@ export const EXAMPLE_REPOS: Record<string, ExampleRepo> = {
     initialPath: "examples",
     defaultRef: "master",
   },
+  "williamluke4" : {
+    user: "williamluke4",
+    repo: "templates",
+    initialPath: "",
+    defaultRef: "main",
+  },
 }

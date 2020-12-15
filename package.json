@@ -2,14 +2,14 @@
   "name": "fster",
   "version": "0.0.6",
   "description": "Make things fast, Break things fast, Learn things fast",
-  "repository": "https://github.com/Harambee-Dev/fast.git",
+  "repository": "https://github.com/Harambee-Dev/fster.git",
   "author": "William Luke <william@atto-byte.com>",
   "bin": {
     "fster": "./dist/bin/fster.js"
   },
   "scripts": {
     "watch": "yarn tsc -d -w -p tsconfig.json",
-    "cli": "ts-node ./src/bin/fast.ts",
+    "cli": "ts-node ./src/bin/fster.ts",
     "prepublish": "yarn build",
     "build": "yarn tsc -d -p tsconfig.json",
     "test": "jest"
