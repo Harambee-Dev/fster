@@ -1,7 +1,9 @@
 # Fster
 
 Make things _fast_, Break things _fast_, Learn things _fast_
-
+```
+npx fster
+```
 [![asciicast](https://asciinema.org/a/xePnK15lBD36vd2IXD0HasrjI.svg)](https://asciinema.org/a/xePnK15lBD36vd2IXD0HasrjI)
 
 ![npm](https://img.shields.io/npm/v/@harambee/fast?style=flat-square)
