@@ -1,4 +1,4 @@
-# Fast
+# Fster
 
 Make things _fast_, Break things _fast_, Learn things _fast_
 
@@ -9,17 +9,17 @@ Make things _fast_, Break things _fast_, Learn things _fast_
 ## Usage
 
 ```shell
-$ npx @harambee/fast <dest> <...options>
+$ npx fster <dest> <...options>
 
-$ yarn global add @harambee/fast
+$ yarn global add fster
 
-$ npm i -g @harambee/fast
+$ npm i -g fster
 ```
 
 ### Global Usage
 
 ```shell
-$ fast <dest> <...options>
+$ fster <dest> <...options>
 ```
 
 ### Options
@@ -39,23 +39,3 @@ Options
 - Vercel
 
 To add more just edit [examples.ts](./src/examples.ts)
-
-## Development
-
-```shell
-git clone https://github.com/Harambee-Dev/fast.git
-cd codemods
-yarn && yarn watch
-```
-
-In a separate terminal you can then run
-
-```shell
-yarn cli --help
-```
-
-### Testing
-
-```shell
-yarn test
-```

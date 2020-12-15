@@ -1,11 +1,11 @@
 {
-  "name": "@harambee/fast",
+  "name": "fster",
   "version": "0.0.5",
   "description": "Make things fast, Break things fast, Learn things fast",
   "repository": "https://github.com/Harambee-Dev/fast.git",
   "author": "William Luke <william@atto-byte.com>",
   "bin": {
-    "fast": "./dist/bin/fast.js"
+    "fster": "./dist/bin/fster.js"
   },
   "scripts": {
     "watch": "yarn tsc -d -w -p tsconfig.json",
