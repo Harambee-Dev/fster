@@ -1,21 +1,28 @@
+import chalk from "chalk";
 import execa from "execa";
-
-const semver = require("semver");
-const inquirer = require("inquirer");
-const chalk = require("chalk");
+import inquirer from "inquirer";
+import semver from "semver";
 
 const update = (
-  command: string,
+  install: {
+    cmd: string;
+    args: string[];
+  },
   latestVersion: string,
   commandOptions?: execa.SyncOptions<string>
 ) => {
   console.log(chalk.blue("Updating..."));
-  if (execa.sync(command, [], commandOptions).exitCode <= 0) {
-    console.log(
-      chalk.green(`Successfully updated to version ${latestVersion}`)
-    );
-  } else {
-    console.log(chalk.red(`Failed to update to version ${latestVersion}`));
+  try {
+    const child = execa.sync(install.cmd, install.args, commandOptions);
+    if (child.exitCode <= 0) {
+      console.log(
+        chalk.green(`Successfully updated to version ${latestVersion}`)
+      );
+    } else {
+      console.log(chalk.red(`Failed to update to version ${latestVersion}`));
+    }
+  } catch (err) {
+    throw new Error(err);
   }
 };
 type Settings = {
@@ -23,8 +30,14 @@ type Settings = {
   version: string;
   autoupdater?: {
     updateMessage: string;
-    checkCommand: string;
-    installCommand: string;
+    check: {
+      cmd: string;
+      args: string[];
+    };
+    install: {
+      cmd: string;
+      args: string[];
+    };
     promptUser: boolean;
     commandOptions: execa.SyncOptions<string>;
   };
@@ -34,15 +47,21 @@ export async function updater({
   version,
   autoupdater = {
     updateMessage: "Would you like to update now?",
-    checkCommand: `npm show ${name} version`,
-    installCommand: `npm install -g ${name}`,
+    check: {
+      cmd: `npm`,
+      args: ["show", name, "version"],
+    },
+    install: {
+      cmd: `npm`,
+      args: ["install", "-g", name],
+    },
     promptUser: true,
     commandOptions: { timeout: 7000, shell: true },
   },
-}: Settings){
+}: Settings) {
   const result = execa.sync(
-    autoupdater.checkCommand,
-    [],
+    autoupdater.check.cmd,
+    autoupdater.check.args,
     autoupdater.commandOptions
   );
 
@@ -51,7 +70,6 @@ export async function updater({
   }
 
   const latestVersion = result.stdout.trim();
-
   if (semver.gt(latestVersion, version)) {
     console.log(chalk.yellow(`New version available: ${latestVersion}`));
     if (autoupdater.promptUser) {
@@ -64,17 +82,17 @@ export async function updater({
           default: true,
         });
         if (answers.shouldUpdate === true) {
-          update(autoupdater.installCommand, latestVersion);
+          update(autoupdater.install, latestVersion);
         }
         return answers.shouldUpdate;
       } catch (err) {
         throw new Error(err);
       }
     } else {
-      update(autoupdater.installCommand, latestVersion);
+      update(autoupdater.install, latestVersion);
       return true;
     }
   } else {
     return false;
   }
-};
+}
