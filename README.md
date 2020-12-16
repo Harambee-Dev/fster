@@ -6,23 +6,23 @@
 
 Make things _fast_, Break things _fast_, Learn things _fster_
 
-```
+## Installing
+
+#### **`npm`**
+
+```shell
 npm i -g fster
 fster local --sync
 ```
 
-[![asciicast](https://asciinema.org/a/xePnK15lBD36vd2IXD0HasrjI.svg)](https://asciinema.org/a/xePnK15lBD36vd2IXD0HasrjI)
-
-
-## Usage
+#### **`yarn`**
 
 ```shell
-$ yarn global add fster
-
-$ npm i -g fster
+yarn global add fster
+fster local --sync
 ```
 
-### Usage
+## Usage
 
 ```shell
   Make things fast, Break things fast, Learn things fast
