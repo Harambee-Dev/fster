@@ -13,10 +13,17 @@ import GitUrlParse from "git-url-parse";
 import os from "os";
 import parse from "parse-git-config";
 import { updater } from "../lib/update";
-
-const client = new PrismaClient();
 const homedir = os.homedir();
+const configDir = fs.dir(path.join(homedir, '.config', 'fster'))
+const configDB = configDir.path('config.db')
+if(!fs.exists(configDB)){
+  fs.copy(path.join(__dirname, '..', '..', 'config.db'), configDB)
+}
+process.env.DATABASE_URL = `file:${configDB}`
 
+const client = new PrismaClient({
+  // log:['error', 'info', 'warn', 'query']
+});
 inquirer.registerPrompt(
   "autocomplete",
   require("inquirer-autocomplete-prompt")
