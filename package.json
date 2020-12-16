@@ -1,17 +1,18 @@
 {
   "name": "fster",
-  "version": "0.2.3",
+  "version": "0.2.6",
   "description": "Make things fast, Break things fast, Learn things fast",
   "repository": "https://github.com/Harambee-Dev/fster.git",
   "author": "William Luke <william@atto-byte.com>",
   "bin": {
     "fster": "./dist/bin/fster.js"
   },
+  "license": "MIT",
   "scripts": {
     "watch": "yarn tsc -d -w -p tsconfig.json",
     "cli": "ts-node ./src/bin/fster.ts",
     "prepublish": "yarn build",
-    "build": "yarn tsc -d -p tsconfig.json",
+    "build": "yarn prisma generate && yarn tsc -d -p tsconfig.json",
     "migrate": "yarn prisma migrate dev --preview-feature",
     "studio": "yarn prisma studio",
     "beta": "yarn publish --tag beta",
