@@ -1,43 +1,43 @@
 # Fster
+![npm](https://img.shields.io/npm/v/fster?style=flat-square)
 
-Make things _fast_, Break things _fast_, Learn things _fast_
+Make things _fast_, Break things _fast_, Learn things _fster_
+
 ```
-npx fster
+npm i -g fster
+fster local --sync
 ```
+
 [![asciicast](https://asciinema.org/a/xePnK15lBD36vd2IXD0HasrjI.svg)](https://asciinema.org/a/xePnK15lBD36vd2IXD0HasrjI)
 
-![npm](https://img.shields.io/npm/v/fster?style=flat-square)
 
 ## Usage
 
 ```shell
-$ npx fster <dest> <...options>
-
 $ yarn global add fster
 
 $ npm i -g fster
 ```
 
-### Global Usage
+### Usage
 
 ```shell
-$ fster <dest> <...options>
+  Make things fast, Break things fast, Learn things fast
+
+  Usage
+  $ fster <command> <...options>
+
+  Commands
+    sync                Sync all local git projects
+    local               Open a local git project
+    settings            Edit your settings
+
+    template <dest>     Select a Template to download
+
+
+  Options
+    -(-s)etup           Runs install after download (template)
+    --sync              Sync all local git projects
+    -(-h)elp            Display this message
+    -(-v)ersion         Display version
 ```
-
-### Options
-
-```shell
-  dest     (optional) Directory to output to
-```
-
-```shell
-Options
-  -(-s)etup         Runs npm install
-```
-
-## Supported Examples
-
-- Prisma
-- Vercel
-
-To add more just edit [examples.ts](./src/examples.ts)

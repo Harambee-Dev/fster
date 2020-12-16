@@ -57,7 +57,7 @@ async function run() {
   const cli = meow(
     `
     ${chalk.bold("Usage")}
-    $ npx fster <command> <...options>
+    $ fster <command> <...options>
 
     Commands
       sync                ${chalk.gray("Sync all local git projects")}
@@ -69,7 +69,7 @@ async function run() {
       
     Options
       -(-s)etup           ${chalk.gray("Runs install after download (template) ")}
-      --sync                ${chalk.gray("Sync all local git projects  ")}
+      --sync              ${chalk.gray("Sync all local git projects  ")}
 
       
 `,
