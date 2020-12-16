@@ -63,7 +63,7 @@ const pkg = fs.read(path.join(__dirname,"..","..", "package.json"), "json")
 async function run() {
   const updated = await updater({name: pkg.name, version: pkg.version})
   if(updated){
-    console.log('Successfully Updated, You may now rerun the last command');
+    console.log('You may now rerun the last command');
     process.exit();
   }
   const currentUser = await getCurrentUser();
