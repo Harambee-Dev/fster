@@ -5,7 +5,7 @@ import meow from "meow";
 import path from "path";
 import { ExampleRepo, EXAMPLE_REPOS } from "../examples";
 import { fetchContent, GithubDownloader } from "../lib/github-download";
-import { PrismaClient, Settings } from "@prisma/client";
+import { PrismaClient, Settings } from "../../client";
 import fg from "fast-glob";
 import fs from "fs-jetpack";
 import fuzzy from "fuzzy";
@@ -56,16 +56,22 @@ async function run() {
 
   const cli = meow(
     `
-  Usage
-    $ npx @harambee/fast <subcommand> <...options>
-      
-      template <dest>    Select a Template to download
-        options
-          -(-s)etup         Runs npm install 
+    ${chalk.bold("Usage")}
+    $ npx fster <command> <...options>
 
-      sync        Sync All Git Projects
-      local       Open A Local Git Project
-      settings    Set your settings 
+    Commands
+      sync                ${chalk.gray("Sync all local git projects")}
+      local               ${chalk.gray("Open a local git project")}
+      settings            ${chalk.gray("Edit your settings ")}
+
+      template <dest>     ${chalk.gray("Select a Template to download")}
+      
+      
+    Options
+      -(-s)etup           ${chalk.gray("Runs install after download (template) ")}
+      --sync                ${chalk.gray("Sync all local git projects  ")}
+
+      
 `,
     {
       autoHelp: true,
