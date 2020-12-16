@@ -12,6 +12,7 @@ import fuzzy from "fuzzy";
 import GitUrlParse from "git-url-parse";
 import os from "os";
 import parse from "parse-git-config";
+import { updater } from "../lib/update";
 
 const client = new PrismaClient();
 const homedir = os.homedir();
@@ -51,7 +52,13 @@ async function getCurrentUser() {
     email,
   };
 }
+const pkg = fs.read(path.join(__dirname,"..","..", "package.json"), "json")
 async function run() {
+  const updated = await updater({name: pkg.name, version: pkg.version})
+  if(updated){
+    console.log('Successfully Updated, You may now rerun the last command');
+    process.exit();
+  }
   const currentUser = await getCurrentUser();
 
   const cli = meow(
