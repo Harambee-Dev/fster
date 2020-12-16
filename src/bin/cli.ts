@@ -69,29 +69,31 @@ async function run() {
   const currentUser = await getCurrentUser();
 
   const cli = meow(
-    `
-    ${chalk.bold("Usage")}
-    $ fster <command> <...options>
+    chalk`
+    {bold Usage}
+    {dim \$} fster  {dim <command>}  {dim <...options>}
 
-    Commands
-      sync                ${chalk.gray("Sync all local git projects")}
-      local               ${chalk.gray("Open a local git project")}
-      settings            ${chalk.gray("Edit your settings ")}
-
-      template <dest>     ${chalk.gray("Select a Template to download")}
+    {bold Commands}
+      sync                {dim Sync all local git projects}
+      local               {dim Open a local git project}
+      settings            {dim Edit your settings }
+      template <dest>     {dim Select a Template to download}
       
       
-    Options
-      -(-s)etup           ${chalk.gray("Runs install after download (template) ")}
-      --sync              ${chalk.gray("Sync all local git projects  ")}
-
-      
+    {bold Options}
+      --sync              {dim Sync all local git projects  }
+      -(-s)etup           (template) {dim Runs install after download }
+      -(-v)ersion         {dim Display Version  }
 `,
     {
       autoHelp: true,
       flags: {
         help: {
           alias: "h",
+          type: "boolean",
+        },
+        version: {
+          alias: "v",
           type: "boolean",
         },
         setup: {
