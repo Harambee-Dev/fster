@@ -1,6 +1,6 @@
 {
   "name": "fster",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Make things fast, Break things fast, Learn things fast",
   "repository": "https://github.com/Harambee-Dev/fster.git",
   "author": "William Luke <william@atto-byte.com>",
@@ -55,6 +55,7 @@
   },
   "files": [
     "dist",
-    "client"
+    "client",
+    "prisma"
   ]
 }
