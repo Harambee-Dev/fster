@@ -123,7 +123,8 @@ async function run() {
           cwd: outputDir,
           stdio: "inherit",
         });
-        logger.success(`${chalk.green("✓")} Packages Installed`);
+        logger.success(`Installing`);
+
         // Clean Git
         const rmGitProcess = await execa(`rm`, ["-rf", "./.git"], {
           cwd: outputDir,
@@ -144,14 +145,16 @@ async function run() {
           cwd: outputDir,
           stdio: "inherit",
         });
-        logger.success(`${chalk.green("✓")} Git Setup and Packages Installed`);
+        logger.success(`Complete`);
         // Open In Editor
-        execa(currentUser?.settings?.editor ?? 'code', [outputDir], {
+        const editorProcess = execa(currentUser?.settings?.editor ?? 'code', ['.'], {
           cwd: outputDir,
-          detached: true
+          detached: true,
+          stdio: 'ignore'
         });
+        editorProcess.unref()
       });
-      return gh.download();
+      gh.download();
     }
   }
   if (cli.input[0] === "local") {
