@@ -117,7 +117,9 @@ async function run() {
       gh.on("end", async () => {
         logger.success(`Downloaded`);
         // Install Deps
-        const installProcess = await execa(currentUser?.settings?.packageManager ?? 'npm', ["install"], {
+        const pkgMnger = currentUser?.settings?.packageManager ?? 'npm'
+        const pkgMngerArgs = pkgMnger === 'npm' ? ['install'] : []
+        const installProcess = await execa(pkgMnger, pkgMngerArgs, {
           cwd: outputDir,
           stdio: "inherit",
         });
@@ -144,9 +146,9 @@ async function run() {
         });
         logger.success(`${chalk.green("✓")} Git Setup and Packages Installed`);
         // Open In Editor
-        const editorProcess = await execa(currentUser?.settings?.editor ?? 'code', [outputDir], {
+        execa(currentUser?.settings?.editor ?? 'code', [outputDir], {
           cwd: outputDir,
-          stdio: "inherit",
+          detached: true
         });
       });
       return gh.download();
