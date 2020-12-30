@@ -19,9 +19,9 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@prisma/cli": "^2.13.0",
+    "@prisma/cli": "^2.14.0-dev.56",
     "@types/adm-zip": "^0.4.33",
-    "@types/fs-extra": "^9.0.4",
+    "@types/fs-extra": "^9.0.6",
     "@types/git-url-parse": "^9.0.0",
     "@types/inquirer": "^7.3.1",
     "@types/jest": "26.0.15",
@@ -38,7 +38,7 @@
     "typescript": "4.0.5"
   },
   "dependencies": {
-    "@prisma/client": "^2.13.0",
+    "@prisma/client": "^2.14.0-dev.56",
     "adm-zip": "^0.4.16",
     "chalk": "^4.1.0",
     "execa": "^4.1.0",

@@ -1,1 +1,0 @@
-export const EXAMPLES_REPO = "https://github.com/prisma/prisma-examples"

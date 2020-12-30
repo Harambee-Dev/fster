@@ -5,39 +5,36 @@ import meow from "meow";
 import path from "path";
 import { ExampleRepo, EXAMPLE_REPOS } from "../examples";
 import { fetchContent, GithubDownloader } from "../lib/github-download";
-import { PrismaClient, Settings } from "../../client";
-import fg from "fast-glob";
+import { client, Settings } from '../lib/prisma'
 import fs from "fs-jetpack";
 import fuzzy from "fuzzy";
-import GitUrlParse from "git-url-parse";
 import os from "os";
-import parse from "parse-git-config";
 import { updater } from "../lib/update";
+import { getCurrentUser } from "../lib/getUser";
+import { sync } from "../lib/sync";
+import logger from "../lib/logger";
+
 const homedir = os.homedir();
 const configDir = fs.dir(path.join(homedir, '.config', 'fster'))
 const configDB = configDir.path('config.db')
 if(!fs.exists(configDB)){
   fs.copy(path.join(__dirname, '..', '..', 'config.db'), configDB)
 }
-process.env.DATABASE_URL = `file:${configDB}`
 
-const client = new PrismaClient({
-  // log:['error', 'info', 'warn', 'query']
-});
 inquirer.registerPrompt(
   "autocomplete",
   require("inquirer-autocomplete-prompt")
 );
 function printSettings(settings: Settings | null, updated?: boolean) {
-  console.log(chalk.bold(`\n  ${updated ? 'Updated ': ''}Settings`));
+  logger.log(chalk.bold(`\n  ${updated ? 'Updated ': ''}Settings`));
   settings &&
     Object.keys(settings).forEach((key) => {
       if (!["id", "userId"].includes(key)) {
         // @ts-ignore
-        console.log(`    ${key}: ${chalk.gray(settings[key])}`);
+        logger.log(`    ${key}: ${chalk.gray(settings[key])}`);
       }
     });
-  console.log("\n");
+  logger.log("\n");
 }
 function search<T>(search: T[], getter: (value: T) => string, input: string) {
   input = input || "";
@@ -50,20 +47,12 @@ function search<T>(search: T[], getter: (value: T) => string, input: string) {
     resolve(results);
   });
 }
-async function getCurrentUser() {
-  const child = await execa("git", ["config", "-l"]);
-  const data = child.stdout.split("\n");
-  const [email, name] = [data[0].split("=")[1], data[1].split("=")[1]];
-  return {
-    name,
-    email,
-  };
-}
+
 const pkg = fs.read(path.join(__dirname,"..","..", "package.json"), "json")
 async function run() {
   const updated = await updater({name: pkg.name, version: pkg.version})
   if(updated){
-    console.log('You may now rerun the last command');
+    logger.success('You may now rerun the last command');
     process.exit();
   }
   const currentUser = await getCurrentUser();
@@ -74,15 +63,12 @@ async function run() {
     {dim \$} fster  {dim <command>}  {dim <...options>}
 
     {bold Commands}
-      sync                {dim Sync all local git projects}
       local               {dim Open a local git project}
       settings            {dim Edit your settings }
       template <dest>     {dim Select a Template to download}
       
       
     {bold Options}
-      --sync              {dim Sync all local git projects  }
-      -(-s)etup           (template) {dim Runs install after download }
       -(-v)ersion         {dim Display Version  }
 `,
     {
@@ -95,19 +81,12 @@ async function run() {
         version: {
           alias: "v",
           type: "boolean",
-        },
-        setup: {
-          alias: "s",
-          type: "boolean",
-        },
-        sync: {
-          type: "boolean",
-        },
+        }
       },
     }
   );
   if(cli.input[0] === 'template'){
-    const argOutputDir = cli.input[0];
+    const argOutputDir = cli.input[1];
     const { who } = await inquirer.prompt([
       {
         type: "list",
@@ -136,105 +115,50 @@ async function run() {
         outputDir,
       });
       gh.on("end", async () => {
-        console.log(`${chalk.green("✓")} Downloaded`);
-        if (cli.flags.setup) {
-          const installProcess = await execa(`npm`, ["install"], {
-            cwd: outputDir,
-            stdio: "inherit",
-          });
-          console.log(`${chalk.green("✓")} Packages Installed`);
-        }
-        console.log(`${chalk.green("✓")} Complete`);
+        logger.success(`Downloaded`);
+        // Install Deps
+        const installProcess = await execa(`npm`, ["install"], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
+        logger.success(`${chalk.green("✓")} Packages Installed`);
+        // Clean Git
+        const rmGitProcess = await execa(`rm`, ["-rf", "./.git"], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
+        // New git
+        const newGitProcess = await execa(`git`, ["init"], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
+        // Add git
+        const addGitProcess = await execa(`git`, ["add", '.'], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
+        // Commit
+        const commitGitProcess = await execa(`git`, ["commit", "-m", `"fster(template): https://github.com/${examples.user}/${examples.repo}/tree/${examples.defaultRef}${found.path}"`], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
+        logger.success(`${chalk.green("✓")} Git Setup and Packages Installed`);
         let getStarted = `\n${chalk.bold("To get started run")}:\n`
-        getStarted += `  cd ${path.relative(process.cwd(), outputDir)}\n`
-        if(!cli.flags.setup){
-          getStarted += "  npm i" 
-        }
-        console.log(getStarted);
+        getStarted += `  cd ${path.relative(process.cwd(), outputDir)}\n\n`
+        logger.log(getStarted);
       });
       return gh.download();
     }
-  }
-  if (cli.input[0] === "sync" || cli.flags.sync) {
-    const user = await client.user.upsert({
-      create: {
-        email: currentUser.email,
-        name: currentUser.name,
-        settings: {
-          create: {},
-        },
-      },
-      update: {},
-      where: {
-        email: currentUser.email,
-      },
-    });
-    const locations = fg.sync([path.join(homedir, "**", ".git")], {
-      onlyDirectories: true,
-      suppressErrors: true,
-      deep: 6,
-      ignore: ["**/node_modules/**"],
-    });
-    for (const location of locations) {
-      const git = await parse({
-        path: ".git/config",
-        cwd: path.dirname(location),
-      });
-      const urls = git
-        ? (Object.keys(git).reduce((acc, key) => {
-            if (key.startsWith("remote")) {
-              // @ts-ignore
-              acc.push(git[key].url);
-            }
-            return acc;
-          }, []) as string[])
-        : [];
-      const url = urls[0] ? GitUrlParse(urls[0]) : null;
-      const project = {
-        folderName: path.basename(path.dirname(location)),
-        projectPath: path.dirname(location),
-        urls,
-        git,
-      };
-      const genUrl = urls[0] ?? `scratchpad/${project.folderName}`;
-      if (genUrl) {
-      }
-      await client.project.upsert({
-        create: {
-          name: url?.full_name ?? `scratchpad/${project.folderName}`,
-          path: project.projectPath,
-          user: { connect: { email: user.email } },
-          url: genUrl,
-        },
-        update: {
-          name: url?.full_name ?? `scratchpad/${project.folderName}`,
-          path: project.projectPath,
-          user: { connect: { email: user.email } },
-        },
-        where: {
-          url: genUrl,
-        },
-      });
-    }
-    const usr = await client.user.findUnique({
-      where: { email: user.email },
-      include: { projects: true },
-    });
-    if (usr?.projects) {
-      for (const p of usr?.projects) {
-        if (!fs.exists(p.path)) {
-          await client.project.delete({ where: { url: p.url } });
-        }
-      }
-    }
-    console.log("Local Projects Synced");
   }
   const user = await client.user.findUnique({
     where: { email: currentUser.email },
     include: { settings: true },
   });
   if (cli.input[0] === "local") {
-    const projects = await client.project.findMany();
+    let projects = await client.project.findMany();
+    sync(currentUser).then((prjs) => {
+      projects=prjs
+    })
     // const argOutputDir = cli.input[0];
     const { repo } = await inquirer.prompt([
       {
@@ -252,10 +176,8 @@ async function run() {
       if (fs.exists(project.path)) {
         execa(user.settings?.editor ?? "code", [project.path]);
       } else {
-        console.error(
-          `${chalk.redBright(
-            "Error"
-          )} Project path no longer exists, please resync`
+        logger.error(
+          `Project path no longer exists, please rerun`
         );
         await client.project.delete({
           where: {
