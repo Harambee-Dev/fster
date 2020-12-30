@@ -16,12 +16,10 @@
 
 ```shell
 npm i -g fster
-fster local --sync
 ```
 
 #### **`yarn`**
 
 ```shell
 yarn global add fster
-fster local --sync
 ```
