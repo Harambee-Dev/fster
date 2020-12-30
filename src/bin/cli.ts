@@ -117,7 +117,7 @@ async function run() {
       gh.on("end", async () => {
         logger.success(`Downloaded`);
         // Install Deps
-        const installProcess = await execa(`npm`, ["install"], {
+        const installProcess = await execa(user?.settings?.packageManager ?? 'npm', ["install"], {
           cwd: outputDir,
           stdio: "inherit",
         });
@@ -143,9 +143,11 @@ async function run() {
           stdio: "inherit",
         });
         logger.success(`${chalk.green("✓")} Git Setup and Packages Installed`);
-        let getStarted = `\n${chalk.bold("To get started run")}:\n`
-        getStarted += `  cd ${path.relative(process.cwd(), outputDir)}\n\n`
-        logger.log(getStarted);
+        // Open In Editor
+        const editorProcess = await execa(user?.settings?.editor ?? 'code', [outputDir], {
+          cwd: outputDir,
+          stdio: "inherit",
+        });
       });
       return gh.download();
     }
