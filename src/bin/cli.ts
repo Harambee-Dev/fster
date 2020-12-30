@@ -117,7 +117,7 @@ async function run() {
       gh.on("end", async () => {
         logger.success(`Downloaded`);
         // Install Deps
-        const installProcess = await execa(user?.settings?.packageManager ?? 'npm', ["install"], {
+        const installProcess = await execa(currentUser?.settings?.packageManager ?? 'npm', ["install"], {
           cwd: outputDir,
           stdio: "inherit",
         });
@@ -144,7 +144,7 @@ async function run() {
         });
         logger.success(`${chalk.green("✓")} Git Setup and Packages Installed`);
         // Open In Editor
-        const editorProcess = await execa(user?.settings?.editor ?? 'code', [outputDir], {
+        const editorProcess = await execa(currentUser?.settings?.editor ?? 'code', [outputDir], {
           cwd: outputDir,
           stdio: "inherit",
         });
@@ -152,10 +152,6 @@ async function run() {
       return gh.download();
     }
   }
-  const user = await client.user.findUnique({
-    where: { email: currentUser.email },
-    include: { settings: true },
-  });
   if (cli.input[0] === "local") {
     let projects = await client.project.findMany();
     sync(currentUser).then((prjs) => {
@@ -174,9 +170,9 @@ async function run() {
       },
     ]);
     const project = projects.find((p) => p.name === repo);
-    if (user?.settings?.editor && project?.path) {
+    if (currentUser?.settings?.editor && project?.path) {
       if (fs.exists(project.path)) {
-        execa(user.settings?.editor ?? "code", [project.path]);
+        execa(currentUser.settings?.editor ?? "code", [project.path]);
       } else {
         logger.error(
           `Project path no longer exists, please rerun`
@@ -190,12 +186,12 @@ async function run() {
     }
   }
   if (cli.input[0] === "settings") {
-    if (!user) throw new Error("No User Found");
+    if (!currentUser) throw new Error("No User Found");
     const settings = {
-      packageManager: user.settings?.packageManager ?? "yarn",
-      editor: user.settings?.editor ?? "code",
+      packageManager: currentUser.settings?.packageManager ?? "yarn",
+      editor: currentUser.settings?.editor ?? "code",
     };
-    printSettings(user.settings);
+    printSettings(currentUser.settings);
     // const argOutputDir = cli.input[0];
     const answers = await inquirer.prompt(
       Object.keys(settings).map((key) => ({
