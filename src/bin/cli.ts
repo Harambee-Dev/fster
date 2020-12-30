@@ -65,7 +65,7 @@ async function run() {
     {bold Commands}
       local               {dim Open a local git project}
       settings            {dim Edit your settings }
-      template <dest>     {dim Select a Template to download}
+      template <dest>     {dim Select a Template to Download, Install and Open}
       
       
     {bold Options}
