@@ -1,6 +1,6 @@
 {
   "name": "fster",
-  "version": "0.4.4",
+  "version": "0.0.0-dripip",
   "description": "Make things ƒast, Break things ƒast, Learn things ƒster",
   "repository": "https://github.com/Harambee-Dev/fster.git",
   "author": "William Luke <william@atto-byte.com>",
@@ -31,6 +31,7 @@
     "@types/parse-git-config": "^3.0.0",
     "@types/request": "^2.48.5",
     "@types/semver": "^7.3.4",
+    "dripip": "^0.10.0",
     "jest": "26.6.3",
     "prettier": "2.1.2",
     "rimraf": "^3.0.2",
