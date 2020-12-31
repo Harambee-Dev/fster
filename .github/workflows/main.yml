@@ -4,6 +4,8 @@ on:
     branches: [main]
 jobs:
   publish:
+    env:
+      DATABASE_URL: "file:../config.db"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
