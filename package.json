@@ -15,7 +15,7 @@
     "build": "yarn prisma generate && yarn tsc -d -p tsconfig.json",
     "migrate": "yarn prisma migrate dev --preview-feature",
     "studio": "yarn prisma studio",
-    "beta": "yarn publish --tag beta",
+    "stable": "yarn -s dripip stable",
     "test": "jest"
   },
   "devDependencies": {
