@@ -56,7 +56,7 @@ const pkg = fs.read(
   "json"
 ) as Partial<PackageJson>;
 async function run() {
-  if (pkg.version && pkg.name && !pkg.name.includes('dev')) {
+  if (pkg.version && pkg.name && !pkg.version.includes('next')) {
     const updated = await updater({ name: pkg.name, version: pkg.version });
     if (updated) {
       logger.success("You may now rerun the last command");
