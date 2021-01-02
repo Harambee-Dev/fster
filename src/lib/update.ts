@@ -2,6 +2,7 @@ import chalk from "chalk";
 import execa from "execa";
 import inquirer from "inquirer";
 import semver from "semver";
+import { spinner } from "./logger";
 
 const update = (
   install: {
@@ -11,18 +12,19 @@ const update = (
   latestVersion: string,
   commandOptions?: execa.SyncOptions<string>
 ) => {
-  console.log(chalk.blue("Updating..."));
+  const loading = spinner('Updating')
+  loading.start()
   try {
     const child = execa.sync(install.cmd, install.args, commandOptions);
     if (child.exitCode <= 0) {
-      console.log(
-        chalk.green(`Successfully updated to version ${latestVersion}`)
-      );
+      loading.message(chalk.green(`Successfully updated to version ${latestVersion}`))
     } else {
-      console.log(chalk.red(`Failed to update to version ${latestVersion}`));
+      loading.message(chalk.red(`Failed to update to version ${latestVersion}`))
     }
   } catch (err) {
     throw new Error(err);
+  } finally {
+    loading.stop()
   }
 };
 type Settings = {
