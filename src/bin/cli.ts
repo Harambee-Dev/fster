@@ -12,7 +12,7 @@ import { ExampleRepo, EXAMPLE_REPOS } from "../examples";
 import { getCurrentUser } from "../lib/getUser";
 import { fetchContent, GithubDownloader } from "../lib/github-download";
 import logger, { spinner } from "../lib/logger";
-import { MD_REGEX } from "../lib/markdown";
+import { READMD_REGEX } from "../lib/markdown";
 import { client, Settings } from "../lib/prisma";
 import { sync } from "../lib/sync";
 import { updater } from "../lib/update";
@@ -177,7 +177,7 @@ async function run() {
           ignoreCase: true,
           matching: "*.md",
         });
-        const file = mdFiles.find((f) => MD_REGEX.exec(f));
+        const file = mdFiles.find((f) => READMD_REGEX.exec(f));
         const parsed = fs.read(path.join(outputDir, "package.json"), "json");
 
         if (parsed && parsed.scripts) {

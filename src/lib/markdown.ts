@@ -84,7 +84,7 @@ marked.use({ renderer });
 interface FileOptions {
   path: string
 }
-export const MD_REGEX = /read/i
+export const READMD_REGEX = /read/i
 export function printMD(data: FileOptions | string) {
   if(typeof data === 'string'){
     console.log(marked(data));
