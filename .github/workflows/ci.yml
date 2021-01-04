@@ -2,6 +2,26 @@ name: ci
 on: [push]
 
 jobs:
+  wip:
+      env:
+        DATABASE_URL: "file:../config.db"
+      strategy:
+        matrix:
+          node-version: [14.x]
+          os: [macos-latest, windows-latest]
+      runs-on: ${{ matrix.os }}
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-node@v1
+          with:
+            node-version: ${{ matrix.node-version }}
+        - name: Install Dependencies
+          run: yarn --immutable
+          
+        - name: Build
+          run: yarn build
+        - name: CLI
+          run: yarn cli -h
   test:
       env:
         DATABASE_URL: "file:../config.db"
