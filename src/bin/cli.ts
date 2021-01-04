@@ -97,10 +97,12 @@ async function run() {
 
 
   if (!cli.input[0] || cli.input[0] === "local") {
+    let synced = false
     let projects = await client.project.findMany();
-    sync(currentUser).then((prjs) => {
-      projects = prjs;
-    });
+    if(projects.length <= 0){
+      projects = await sync(currentUser)
+      synced = true
+    }
     // const argOutputDir = cli.input[0];
     const { repo } = await inquirer.prompt([
       {
@@ -125,6 +127,10 @@ async function run() {
           },
         });
       }
+    }
+    if(!synced){
+      projects = await sync(currentUser)
+      synced = true
     }
   }
   if (cli.input[0] === "template") {
