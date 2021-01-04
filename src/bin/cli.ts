@@ -78,6 +78,7 @@ async function run() {
       
     {bold Options}
       -(-v)ersion         {dim Display Version  }
+      -(-h)elp            {dim Display This  }
 `,
     {
       autoHelp: true,
