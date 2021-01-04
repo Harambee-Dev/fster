@@ -13,6 +13,7 @@
     "cli": "ts-node ./src/bin/fster.ts",
     "prepublish": "yarn rimraf ./config.db && yarn migrate && yarn build",
     "build": "yarn prisma generate && yarn tsc -d -p tsconfig.json",
+    "postinstall": "yarn prisma generate",
     "migrate": "yarn prisma migrate dev --preview-feature",
     "studio": "yarn prisma studio",
     "stable": "yarn -s dripip stable",
