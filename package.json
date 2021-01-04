@@ -21,7 +21,6 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@prisma/cli": "^2.14.0-dev.62",
     "@types/adm-zip": "^0.4.33",
     "@types/ci-info": "^2.0.0",
     "@types/clui": "^0.3.0",
@@ -45,6 +44,7 @@
     "typescript": "4.1.3"
   },
   "dependencies": {
+    "@prisma/cli": "^2.14.0-dev.62",
     "@prisma/client": "^2.14.0-dev.62",
     "adm-zip": "^0.5.1",
     "chalk": "^4.1.0",
