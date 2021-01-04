@@ -16,6 +16,7 @@ import { READMD_REGEX } from "../lib/markdown";
 import { client, Settings } from "../lib/prisma";
 import { sync } from "../lib/sync";
 import { updater } from "../lib/update";
+import ci from 'ci-info'
 
 const homedir = os.homedir();
 const configDir = fs.dir(path.join(homedir, ".config", "fster"));
@@ -56,7 +57,7 @@ const pkg = fs.read(
   "json"
 ) as Partial<PackageJson>;
 async function run() {
-  if (pkg.version && pkg.name && !pkg.version.includes('next')) {
+  if (!ci.isCI && pkg.version && pkg.name && !pkg.version.includes('next')) {
     const updated = await updater({ name: pkg.name, version: pkg.version });
     if (updated) {
       logger.success("You may now rerun the last command");
