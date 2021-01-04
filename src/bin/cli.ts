@@ -94,6 +94,38 @@ async function run() {
     }
   );
 
+
+  if (!cli.input[0] || cli.input[0] === "local") {
+    let projects = await client.project.findMany();
+    sync(currentUser).then((prjs) => {
+      projects = prjs;
+    });
+    // const argOutputDir = cli.input[0];
+    const { repo } = await inquirer.prompt([
+      {
+        type: "autocomplete",
+        name: "repo",
+        required: true,
+        message: "What would you like to Open?",
+        pageSize: 10,
+        source: (answers: any, input: string) =>
+          search(projects, (p) => p.name ?? "None", input),
+      },
+    ]);
+    const project = projects.find((p) => p.name === repo);
+    if (currentUser?.settings?.editor && project?.path) {
+      if (fs.exists(project.path)) {
+        execa(currentUser.settings?.editor ?? "code", [project.path]);
+      } else {
+        logger.error(`Project path no longer exists, please rerun`);
+        await client.project.delete({
+          where: {
+            url: project.url,
+          },
+        });
+      }
+    }
+  }
   if (cli.input[0] === "template") {
     const argOutputDir = cli.input[1];
     const { who } = await inquirer.prompt([
@@ -195,14 +227,12 @@ async function run() {
           logger.log(chalk.bold.underline("\nScripts"));
           logger.log(indentString(display, 2));
         }
-        if (
-          file &&
-          (await logger.confirm(
-            `Would you like open this project using ${chalk.inverse(
-              ` ${currentUser.settings?.editor} `
-            )}`
-          ))
-        ) {
+        const openInEditor = await logger.confirm(
+          `Would you like open this project using ${chalk.inverse(
+            ` ${currentUser.settings?.editor} `
+          )}`
+        )
+        if (file && openInEditor) {
           // printMD({ path: file });
           // Open In Editor
           const editorProcess = execa(
@@ -218,37 +248,6 @@ async function run() {
         }
       });
       gh.download();
-    }
-  }
-  if (cli.input[0] === "local") {
-    let projects = await client.project.findMany();
-    sync(currentUser).then((prjs) => {
-      projects = prjs;
-    });
-    // const argOutputDir = cli.input[0];
-    const { repo } = await inquirer.prompt([
-      {
-        type: "autocomplete",
-        name: "repo",
-        required: true,
-        message: "What would you like to Open?",
-        pageSize: 10,
-        source: (answers: any, input: string) =>
-          search(projects, (p) => p.name ?? "None", input),
-      },
-    ]);
-    const project = projects.find((p) => p.name === repo);
-    if (currentUser?.settings?.editor && project?.path) {
-      if (fs.exists(project.path)) {
-        execa(currentUser.settings?.editor ?? "code", [project.path]);
-      } else {
-        logger.error(`Project path no longer exists, please rerun`);
-        await client.project.delete({
-          where: {
-            url: project.url,
-          },
-        });
-      }
     }
   }
   if (cli.input[0] === "settings") {
