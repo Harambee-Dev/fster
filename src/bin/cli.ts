@@ -74,6 +74,7 @@ async function run() {
     {bold Commands}
       local               {dim Open a local git project}
       settings            {dim Edit your settings }
+      organize            {dim Organize all Git Projects (Not Implemented) }
       template <dest>     {dim Select a Template to Download, Install and Open}
       
       
@@ -101,7 +102,9 @@ async function run() {
     }
   );
 
+  if (cli.input[0] === "organize") {
 
+  }
   if (!cli.input[0] || cli.input[0] === "local") {
     let synced = false
     let projects = await client.project.findMany();
@@ -117,11 +120,26 @@ async function run() {
         required: true,
         message: "What would you like to Open?",
         pageSize: 10,
-        source: (answers: any, input: string) =>
-          search(projects, (p) => p.name ?? "None", input),
+        source: (answers: any, input: string) => {
+        const maxPLength = projects.reduce((acc, p) => {
+          const full = p.name ?? ''
+          if(full.length > acc) return full.length
+          return acc
+        }, 0)
+        return search(projects, (p) => {
+            const parentDir = path.basename(p.path)
+            const parentParentDir = path.basename(path.join(p.path, '..'))
+            const projectPath = `${parentParentDir}/${parentDir}`
+            if(currentUser.settings?.templatesDisplayFolder){
+              return `${p.name}${` `.repeat(maxPLength - (p.name?.length || 0))} ${chalk.dim(projectPath)}` ?? "None"
+            }
+            return `${p.name}` ?? "None"
+          }, input)
+        }
       },
     ]);
-    const project = projects.find((p) => p.name === repo);
+    const selectedRepo = currentUser.settings?.templatesDisplayFolder ? repo.split(' ')[0] : repo
+    const project = projects.find((p) => p.name === selectedRepo);
     if (currentUser?.settings?.editor && project?.path) {
       if (fs.exists(project.path)) {
         execa(currentUser.settings?.editor ?? "code", [project.path]);
@@ -129,7 +147,10 @@ async function run() {
         logger.error(`Project path no longer exists, please rerun`);
         await client.project.delete({
           where: {
-            url: project.url,
+            url_path_unique: {
+              path: project.path,
+              url: project.url 
+            }
           },
         });
       }
@@ -265,15 +286,16 @@ async function run() {
   }
   if (cli.input[0] === "settings") {
     if (!currentUser) throw new Error("No User Found");
-    const settings = {
+    const settings: Partial<Settings> = {
       packageManager: currentUser.settings?.packageManager ?? "yarn",
       editor: currentUser.settings?.editor ?? "code",
+      templatesDisplayFolder: currentUser.settings?.templatesDisplayFolder ?? false,
     };
     printSettings(currentUser.settings);
     // const argOutputDir = cli.input[0];
     const answers = await inquirer.prompt(
       Object.keys(settings).map((key) => ({
-        type: "input",
+        type: typeof settings[key as keyof Settings] === "string" ? 'input' : 'confirm',
         name: key,
         required: true,
         // @ts-ignore
@@ -287,6 +309,7 @@ async function run() {
           update: {
             editor: answers.editor,
             packageManager: answers.packageManager,
+            templatesDisplayFolder: answers.templatesDisplayFolder
           },
         },
       },

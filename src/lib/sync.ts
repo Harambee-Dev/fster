@@ -74,7 +74,10 @@ export async function sync(currentUser?: { name: string; email: string }) {
         user: { connect: { email: user.email } },
       },
       where: {
-        url: genUrl,
+        url_path_unique: {
+          url: genUrl,
+          path: project.projectPath
+        }
       },
     });
   }
@@ -85,7 +88,7 @@ export async function sync(currentUser?: { name: string; email: string }) {
   if (usr?.projects) {
     for (const p of usr?.projects) {
       if (!fs.exists(p.path)) {
-        await client.project.delete({ where: { url: p.url } });
+        await client.project.delete({ where: { url_path_unique: { url: p.url, path: p.path} } });
       }
     }
   }

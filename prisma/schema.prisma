@@ -12,11 +12,14 @@ generator client {
 }
 
 model Project {
-  url    String  @unique
+  id     Int       @id @default(autoincrement())
+  url    String  
   name   String?
   path   String
   user   User    @relation(fields: [userId], references: [id])
   userId Int
+  
+  @@unique([url, path], name: "url_path_unique")
 }
 
 model User {
@@ -32,4 +35,5 @@ model Settings {
   user   User    
   packageManager String @default("yarn")
   editor String @default("code")
+  templatesDisplayFolder Boolean @default(false)
 }
