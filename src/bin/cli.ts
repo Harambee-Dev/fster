@@ -79,7 +79,8 @@ async function run() {
       
     {bold Options}
       -(-v)ersion         {dim Display Version  }
-      -(-h)elp            {dim Display This  }
+      -(-s)ync            {dim Synchronize Local Projects  }
+      -(-h)elp            {dim Display this  }
 `,
     {
       autoHelp: true,
@@ -92,6 +93,10 @@ async function run() {
           alias: "v",
           type: "boolean",
         },
+        sync: {
+          alias: "s",
+          type: "boolean",
+        },
       },
     }
   );
@@ -100,8 +105,8 @@ async function run() {
   if (!cli.input[0] || cli.input[0] === "local") {
     let synced = false
     let projects = await client.project.findMany();
-    if(projects.length <= 0){
-      projects = await sync(currentUser)
+    if(projects.length <= 0 || cli.flags.sync){
+      projects = await logger.run('Synchronizing Projects', sync(currentUser)) ?? []
       synced = true
     }
     // const argOutputDir = cli.input[0];
