@@ -27,13 +27,13 @@ export function error(message: any, ...optionalParams: any[]) {
 
 export const spinner = (action: string) =>  new CLI.Spinner(action, ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'])
 
-export async function run<T>(action: string, callback: Promise<T>) {
+export async function run<T>(action: string, callback: Promise<T>, onComplete?: string) {
   let countdown = new CLI.Spinner(action, ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'])
   try {
     countdown.start()
     const value = await callback
     countdown.stop();
-    success(action)
+    success(onComplete ?? action)
     return value
   } catch (reason){
     countdown.stop();

@@ -11,7 +11,9 @@ export async function getCurrentUser() {
   if(!usr){
     usr = await client.user.create({
       data: { 
-        name, email,
+        name, email, settings : {
+          create: {}
+        }
       },
       include: { projects: true, settings: true}
     })

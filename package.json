@@ -11,7 +11,7 @@
   "scripts": {
     "watch": "yarn tsc -d -w -p tsconfig.json",
     "cli": "ts-node ./src/bin/fster.ts",
-    "prepublish": "yarn rimraf ./config.db && yarn generate && yarn migrate && yarn build",
+    "prepublish": "dotenv -- yarn rimraf ./config.db && yarn generate && yarn migrate && yarn build",
     "build": "yarn generate && yarn tsc -d -p tsconfig.json",
     "postinstall": "yarn generate",
     "generate": "yarn prisma generate",

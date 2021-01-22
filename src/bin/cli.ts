@@ -13,17 +13,11 @@ import { getCurrentUser } from "../lib/getUser";
 import { fetchContent, GithubDownloader } from "../lib/github-download";
 import logger, { spinner } from "../lib/logger";
 import { READMD_REGEX } from "../lib/markdown";
-import { client, Settings } from "../lib/prisma";
+import { checkSetup, client, Settings } from "../lib/prisma";
 import { sync } from "../lib/sync";
 import { updater } from "../lib/update";
 import ci from 'ci-info'
 
-const homedir = os.homedir();
-const configDir = fs.dir(path.join(homedir, ".config", "fster"));
-const configDB = configDir.path("config.db");
-if (!fs.exists(configDB)) {
-  fs.copy(path.join(__dirname, "..", "..", "config.db"), configDB);
-}
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -56,7 +50,10 @@ const pkg = fs.read(
   path.join(__dirname, "..", "..", "package.json"),
   "json"
 ) as Partial<PackageJson>;
+
+
 async function run() {
+  await checkSetup()
   if (!ci.isCI && pkg.version && pkg.name && !pkg.version.includes('next')) {
     const updated = await updater({ name: pkg.name, version: pkg.version });
     if (updated) {
@@ -109,7 +106,7 @@ async function run() {
     let synced = false
     let projects = await client.project.findMany();
     if(projects.length <= 0 || cli.flags.sync){
-      projects = await logger.run('Synchronizing Projects', sync(currentUser)) ?? []
+      projects = await logger.run('Synchronizing Projects', sync(currentUser), 'Synchronized') ?? []
       synced = true
     }
     // const argOutputDir = cli.input[0];
@@ -130,7 +127,7 @@ async function run() {
             const parentDir = path.basename(p.path)
             const parentParentDir = path.basename(path.join(p.path, '..'))
             const projectPath = `${parentParentDir}/${parentDir}`
-            if(currentUser.settings?.templatesDisplayFolder){
+            if(currentUser.settings?.displayFolders){
               return `${p.name}${` `.repeat(maxPLength - (p.name?.length || 0))} ${chalk.dim(projectPath)}` ?? "None"
             }
             return `${p.name}` ?? "None"
@@ -138,7 +135,7 @@ async function run() {
         }
       },
     ]);
-    const selectedRepo = currentUser.settings?.templatesDisplayFolder ? repo.split(' ')[0] : repo
+    const selectedRepo = currentUser.settings?.displayFolders ? repo.split(' ')[0] : repo
     const project = projects.find((p) => p.name === selectedRepo);
     if (currentUser?.settings?.editor && project?.path) {
       if (fs.exists(project.path)) {
@@ -289,7 +286,7 @@ async function run() {
     const settings: Partial<Settings> = {
       packageManager: currentUser.settings?.packageManager ?? "yarn",
       editor: currentUser.settings?.editor ?? "code",
-      templatesDisplayFolder: currentUser.settings?.templatesDisplayFolder ?? false,
+      displayFolders: currentUser.settings?.displayFolders ?? false,
     };
     printSettings(currentUser.settings);
     // const argOutputDir = cli.input[0];
@@ -309,7 +306,7 @@ async function run() {
           update: {
             editor: answers.editor,
             packageManager: answers.packageManager,
-            templatesDisplayFolder: answers.templatesDisplayFolder
+            displayFolders: answers.displayFolders
           },
         },
       },
