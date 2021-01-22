@@ -63,3 +63,4 @@ typings/
 !tests/**/*.js
 # Generated Prisma Clients
 /client 
+config.db
