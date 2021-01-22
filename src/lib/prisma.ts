@@ -9,12 +9,6 @@ if(!fs.exists(configDB)){
   fs.copy(path.join(__dirname, '..', '..', 'config.db'), configDB)
 }
 
-
-if(!fs.exists(configDB)){
-  fs.copy(path.join(__dirname, '..', '..', 'config.db'), configDB)
-}
-
-
 process.env.DATABASE_URL = `file:${configDB}`
 
 
