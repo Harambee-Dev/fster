@@ -12,20 +12,24 @@ const update = (
   latestVersion: string,
   commandOptions?: execa.SyncOptions<string>
 ) => {
-  const loading = spinner('Updating')
-  loading.start()
-  try {
-    const child = execa.sync(install.cmd, install.args, commandOptions);
-    if (child.exitCode <= 0) {
-      loading.message(chalk.green(`Successfully updated to version ${latestVersion}`))
-    } else {
-      loading.message(chalk.red(`Failed to update to version ${latestVersion}`))
+  return new Promise<void>((res) => {
+
+    const loading = spinner('Updating')
+    loading.start()
+    try {
+      const child = execa.sync(install.cmd, install.args, commandOptions);
+      if (child.exitCode <= 0) {
+        loading.message(chalk.green(`Successfully updated to version ${latestVersion}`))
+      } else {
+        loading.message(chalk.red(`Failed to update to version ${latestVersion}`))
+      }
+    } catch (err) {
+      throw new Error(err);
+    } finally {
+      loading.stop()
+      res()
     }
-  } catch (err) {
-    throw new Error(err);
-  } finally {
-    loading.stop()
-  }
+  })
 };
 type Settings = {
   name: string;
@@ -84,14 +88,14 @@ export async function updater({
           default: true,
         });
         if (answers.shouldUpdate === true) {
-          update(autoupdater.install, latestVersion);
+          await update(autoupdater.install, latestVersion);
         }
         return answers.shouldUpdate;
       } catch (err) {
         throw new Error(err);
       }
     } else {
-      update(autoupdater.install, latestVersion);
+      await update(autoupdater.install, latestVersion);
       return true;
     }
   } else {
