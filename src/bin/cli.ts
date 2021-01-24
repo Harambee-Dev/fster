@@ -107,7 +107,6 @@ async function run() {
   if (cli.input[0] === "organize") {
 
   }
-  cli.
   if (!cli.input[0] || cli.input[0] === "local") {
     let synced = false
     let projects = await client.project.findMany();
