@@ -55,7 +55,12 @@ const pkg = fs.read(
 async function run() {
   await checkSetup()
   if (!ci.isCI && pkg.version && pkg.name && !pkg.version.includes('next')) {
-    const updated = await updater({ name: pkg.name, version: pkg.version });
+    let updated = false
+    try {
+      updated = await updater({ name: pkg.name, version: pkg.version });
+    } catch {
+      // No Internet Connection or ..
+    }
     if (updated) {
       logger.success("You may now rerun the last command");
       process.exit();
@@ -102,6 +107,7 @@ async function run() {
   if (cli.input[0] === "organize") {
 
   }
+  cli.
   if (!cli.input[0] || cli.input[0] === "local") {
     let synced = false
     let projects = await client.project.findMany();
