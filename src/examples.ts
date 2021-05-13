@@ -23,4 +23,10 @@ export const EXAMPLE_REPOS: Record<string, ExampleRepo> = {
     initialPath: "",
     defaultRef: "main",
   },
+  "napi-rs" : {
+    user: "napi-rs",
+    repo: "package-template",
+    initialPath: "",
+    defaultRef: "main",
+  },
 }
